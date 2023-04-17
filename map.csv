@@ -1,0 +1,188 @@
+﻿country;iso;2000;2016;change
+Afghanistan;AFG;10;38;28
+Albania;ALB;44;49;5
+Algeria;DZA;17;38;21
+Angola;AGO;20;29;9
+Antigua and Barbuda;ATG;54;65;11
+Argentina;ARG;59;50;-9
+Armenia;ARM;43;37;-6
+Australia;AUS;90;77;-13
+Austria;AUT;88;77;-11
+Azerbaijan;AZE;30;11;-19
+Bahamas;BHS;93;78;-15
+Bahrain;BHR;25;13;-12
+Bangladesh;BGD;40;39;-1
+Barbados;BRB;84;82;-2
+Belarus;BLR;20;9;-11
+Belgium;BEL;91;89;-2
+Belize;BLZ;75;78;3
+Benin;BEN;70;62;-8
+Bhutan;BTN;24;42;18
+Bolivia;BOL;78;51;-27
+Bosnia and Herzegovina;BIH;44;50;6
+Botswana;BWA;72;55;-17
+Brazil;BRA;67;54;-13
+Brunei ;BRN;26;24;-2
+Bulgaria;BGR;70;60;-10
+Burkina Faso;BFA;60;59;-1
+Burundi;BDI;17;20;3
+Cabo Verde;CPV;68;73;5
+Cambodia;KHM;39;31;-8
+Cameroon;CMR;23;35;12
+Canada;CAN;86;82;-4
+Central African Republic;CAF;40;29;-11
+Chad;TCD;28;26;-2
+Chile;CHL;73;71;-2
+China;CHN;20;13;-7
+Colombia;COL;41;44;3
+Comoros;COM;60;51;-9
+Congo, Democratic Republic;COD;10;22;12
+Congo, Republic;COG;23;41;18
+Costa Rica;CRI;84;83;-1
+Cote d'Ivoire;CIV;26;49;23
+Croatia;HRV;37;58;21
+Cyprus;CYP;84;76;-8
+Czechia;CZE;80;79;-1
+Denmark;DNK;91;88;-3
+Djibouti;DJI;37;25;-12
+Dominica;DMA;84;74;-10
+Dominican Republic;DOM;70;58;-12
+Ecuador;ECU;56;34;-22
+Egypt;EGY;31;23;-8
+El Salvador;SLV;60;61;1
+Equatorial Guinea;GNQ;22;9;-13
+Eritrea;ERI;32;6;-26
+Estonia;EST;80;84;4
+Eswatini;SWZ;;;
+Ethiopia;ETH;38;17;-21
+Fiji;FJI;42;52;10
+Finland;FIN;85;89;4
+France;FRA;76;72;-4
+Gabon;GAB;45;32;-13
+Gambia;GMB;;;
+Georgia;GEO;53;51;-2
+Germany;DEU;87;80;-7
+Ghana;GHA;39;69;30
+Greece;GRC;70;52;-18
+Grenada;GRD;80;76;-4
+Guatemala;GTM;46;42;-4
+Guinea;GIN;29;35;6
+Guinea-Bissau;GNB;44;40;-4
+Guyana;GUY;78;64;-14
+Haiti;HTI;42;48;6
+Honduras;HND;52;33;-19
+Hungary;HUN;70;60;-10
+Iceland;ISL;88;85;-3
+India;IND;58;59;1
+Indonesia;IDN;51;51;0
+Iran;IRN;32;10;-22
+Iraq;IRQ;2;29;27
+Ireland;IRL;79;83;4
+Israel;ISR;70;68;-2
+Italy;ITA;73;69;-4
+Jamaica;JAM;89;82;-7
+Japan;JPN;81;74;-7
+Jordan;JOR;43;34;-9
+Kazakhstan;KAZ;32;16;-16
+Kenya;KEN;30;42;12
+Kiribati;KIR;83;70;-13
+Korea, South;KOR;73;67;-6
+Kosovo;XKX;;51;
+Kuwait;KWT;52;41;-11
+Kyrgyz Republic;KGZ;39;33;-6
+Laos;LAO;34;16;-18
+Latvia;LVA;76;72;-4
+Lebanon;LBN;39;44;5
+Lesotho;LSO;44;51;7
+Liberia;LBR;33;42;9
+Libya;LBY;10;25;15
+Liechtenstein;LIE;;86;
+Lithuania;LTU;80;77;-3
+Luxembourg;LUX;90;87;-3
+Madagascar;MDG;68;42;-26
+Malawi;MWI;48;55;7
+Malaysia;MYS;30;33;3
+Maldives;MDV;35;42;7
+Mali;MLI;74;63;-11
+Malta;MLT;83;77;-6
+Marshall Islands;MHL;92;83;-9
+Mauritania;MRT;33;49;16
+Mauritius;MUS;83;71;-12
+Mexico;MEX;50;36;-14
+Moldova;MDA;42;44;2
+Mongolia;MNG;71;63;-8
+Montenegro;MNE;19;59;40
+Morocco;MAR;51;34;-17
+Mozambique;MOZ;52;54;2
+Myanmar;MMR;0;27;27
+Namibia;NAM;66;67;1
+Nepal;NPL;41;46;5
+Netherlands;NLD;86;89;3
+New Zealand;NZL;92;80;-12
+Nicaragua;NIC;60;46;-14
+Niger;NER;38;47;9
+Nigeria;NGA;47;49;2
+North Macedonia;MKD;58;38;-20
+Norway;NOR;95;91;-4
+Oman;OMN;29;29;0
+Pakistan;PAK;36;36;0
+Palau;PLW;;85;
+Panama;PAN;70;54;-16
+Papua New Guinea;PNG;72;71;-1
+Paraguay;PRY;49;42;-7
+Peru;PER;33;54;21
+Philippines;PHL;70;56;-14
+Poland;POL;81;72;-9
+Portugal;PRT;83;82;-1
+Qatar;QAT;38;31;-7
+Romania;ROU;56;62;6
+Russian Federation;RUS;40;17;-23
+Rwanda;RWA;28;21;-7
+Saint Kitts and Nevis;KNA;82;80;-2
+Saint Lucia;LCA;87;85;-2
+Saint Vincent and the Grenadines;VCT;84;83;-1
+Samoa;WSM;66;71;5
+Sao Tome and Principe;STP;73;72;-1
+Saudi Arabia;SAU;10;14;4
+Senegal;SEN;67;51;-16
+Serbia;SRB;19;55;36
+Seychelles;SYC;50;51;1
+Sierra Leone;SLE;15;47;32
+Singapore;SGP;34;33;-1
+Slovak Republic;SVK;70;76;6
+Slovenia;SVN;73;77;4
+Solomon Islands;SLB;82;73;-9
+Somalia;SOM;12;21;9
+South Africa;ZAF;75;64;-11
+South Sudan;SSD;;34;
+Spain;ESP;82;72;-10
+Sri Lanka;LKA;30;36;6
+Sudan;SDN;15;15;0
+Suriname;SUR;69;72;3
+Sweden;SWE;89;89;0
+Switzerland;CHE;92;87;-5
+Syria;SYR;27;10;-17
+Tajikistan;TJK;6;17;11
+Tanzania;TZA;51;45;-6
+Thailand;THA;70;23;-47
+Timor-Leste;TLS;;65;
+Togo;TGO;26;40;14
+Tonga;TON;64;71;7
+Trinidad and Tobago;TTO;72;73;1
+Tunisia;TUN;26;48;22
+Turkey;TUR;42;29;-13
+Turkmenistan;TKM;14;4;-10
+Tuvalu;TUV;;73;
+Uganda;UGA;60;43;-17
+Ukraine;UKR;40;47;7
+United Arab Emirates;ARE;24;22;-2
+United Kingdom;GBR;80;75;-5
+United States;USA;87;79;-8
+Uruguay;URY;71;75;4
+Uzbekistan;UZB;17;5;-12
+Vanuatu;VUT;56;75;19
+Venezuela;VEN;66;20;-46
+Vietnam;VNM;25;15;-10
+Yemen;YEM;32;17;-15
+Zambia;ZMB;38;39;1
+Zimbabwe;ZWE;33;26;-7
