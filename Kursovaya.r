@@ -24,6 +24,8 @@ library(raster)
 library(sandwich)
 library(broom)
 library(ggpubr)
+library(splm)
+library(spam)
 
 #Директория сохранения ---------------------------------------------------------
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
@@ -161,9 +163,6 @@ distribution <- ggarrange(p1, p2, p3, p4, p5, p6, p7, ncol = 2, nrow=4)
 distribution
 
 # Объединение пространственных и усредненных данных ------------------------------
-#world_sp <- readOGR("gadm", "TM_WORLD_BORDERS-0.3")
-#plot(world_sp)
-#DataFrame_sp <- merge(world_sp, average, by.x='ISO3',by.y='iso')
 
 world <- sf::st_read("gadm/TM_WORLD_BORDERS-0.3.shp")
 DataFrame <- merge(world, average, by.x='ISO3',by.y='iso')
@@ -174,7 +173,7 @@ DataFrame$country.id<-DataFrame$NAME
 DataFrame <- as(DataFrame, "Spatial")
 View(DataFrame@data)
 
-queen.nb<-poly2nb(DataFrame,queen=TRUE, row.names=DataFrame$NAME) 
+queen.nb<-poly2nb(DataFrame,queen=TRUE, row.names=DataFrame$ISO3) 
 listw1<-nb2listw(queen.nb, style="W", zero.policy = TRUE) #convert nb to listw type
 attr(queen.nb, "country.id")<- as.character(DataFrame$country.id)
 summary(queen.nb)
@@ -219,38 +218,23 @@ moran.test(DataFrame$frpressfh, listw1, zero.policy=TRUE, na.action=na.omit)
 moran.test(DataFrame$frpressrsf, listw1, zero.policy=TRUE, na.action=na.omit)
 # H0 is rejected p-value = 2.2e-16 Moran I=0.520363392
 
-#moran.plot(DataFrame$frpressrsf, listw1, zero.policy=FALSE, xlab="Свобода прессы RSF", ylab="Свобода прессы RSF с пространственным отставанием")
-
 moran.test(DataFrame$gdppc, listw1, zero.policy=TRUE)
 # H0 is rejected p-value = 2.2e-16 Moran I=0.603638532
-
-#moran.plot(DataFrame$gdppc, listw1, zero.policy=FALSE)
 
 moran.test(DataFrame$pop, listw1, zero.policy=TRUE)
 # H0 is rejected only on 5% p-value = 0.01538 Moran I=0.130290766
 
-#moran.plot(DataFrame$pop, listw1, zero.policy=FALSE)
-
 moran.test(DataFrame$fdi, listw1, zero.policy=TRUE)
 # H0 is rejected p-value = 2.341e-05 Moran I=0.251539345
-
-#moran.plot(DataFrame$fdi, listw1, zero.policy=FALSE)
 
 moran.test(DataFrame$intusers, listw1, zero.policy=TRUE)
 # H0 is NOT rejected p-value = 0.3326 Moran I=0.020727519
 
-#moran.plot(DataFrame$intusers, listw1, zero.policy=FALSE)
-
 moran.test(DataFrame$crises, listw1, zero.policy=TRUE)
 # H0 is NOT rejected p-value = 0.162 Moran I=0.054907587 
 
-#moran.plot(DataFrame$crises, listw1, zero.policy=FALSE)
-
 moran.test(DataFrame$democ, listw1, zero.policy=TRUE, na.action=na.omit)
 # H0 is rejected p-value = 2.2e-16 Moran I=0.583000581  
-
-#moran.plot(DataFrame$democ, listw1, zero.policy=FALSE)
-
 
 ## Остатки OLS модели
 resid1 <- ols1$residuals
@@ -334,6 +318,9 @@ moran.test(data2019$pop, listw1, zero.policy=TRUE, na.action=na.omit)
 
 ## POLS ------------------------------------------------------------------------
 
+print("Count of total missing values - ")
+sum(is.na(panel))
+
 m.fe1 <- plm(frpressfh ~ gdppc+pop+fdi+intusers+crises+democ, data = panel, model = "within")
 m.fe2 <- plm(frpressrsf ~ gdppc+pop+fdi+intusers+crises+democ, data = panel, model = "within")
 
@@ -341,23 +328,81 @@ stargazer(m.fe1,m.fe2, type = "html",
           out = "pols.htm",
           title = "Results of POLS Model")
 
+# Матрица смежности ------------------------------------------------------------
+DataFrameRes2$country.id<-DataFrameRes2$ISO3
+#DataFrameRes2 <- as(DataFrameRes2, "Spatial")
+#View(DataFrameRes2@data)
+weightsrsf <- read.csv("weightsrsf.csv", header = TRUE, sep = ";", row.names=1)
+weightrsf = weightsrsf[,colSums(weightsrsf)!=0]
+weightrsf = weightrsf[rowSums(weightrsf[])>0,]
+
+wrsf <- as.matrix(weightrsf)
+## standardization
+## make it a listw
+lwrsf <- mat2listw(wrsf)
+#lw <- nb2listw(lw$neighbours, glist=lw$weights, zero.policy=TRUE)
+summary(lw)
+
+# Объединение пространственных и панельных данных ------------------------------
+countries <- row.names(weights)
+
+panel2 <- panel %>% filter(iso %in% countries)
+write.csv(panel2, "panel2.csv")
+
+data2 <- read.csv("panelsplm.csv", header = TRUE, sep = ";")
+#panel2 <- pdata.frame(data2, index = c("iso", "year"), row.names = TRUE)
+
+datafh <- subset(data2, select = -c(frpressrsf))
+datarsf <- subset(data2, select = -c(frpressfh))
+panelrsf <- pdata.frame(datarsf, index = c("iso", "year"), row.names = TRUE)
+
+length(unique(datarsf$iso))
+
+#weightsfh = weight[rownames(weight)!=c("GMB", "SWZ"),colnames(weight)!=c("GMB", "SWZ")]
+#weightsrsf = weight[rownames(weight)!=c("KWT"),colnames(weight)!=c("KWT")]
+
+lwfh <- mat2listw(weight)
+lwrsf <- mat2listw(weight)
+#DataFrameRes2 <- merge(world, panel2, by.x='ISO3',by.y='iso')
+#DataFrameRes2 <- pdata.frame(DataFrameRes2, index = c("ISO3", "year"), row.names = TRUE)
+#sf_use_s2(FALSE)
+
+## Fixed effects SAR
+sarfe <- spml(formula = frpressrsf ~ gdppc+pop+fdi+intusers+crises+democ, data = datarsf, listw = lwrsf, model = "within",
+              index = c("iso", "year"),
+              effect = "individual",
+              spatial.error = "none", lag = TRUE)
+summary(sarfe)
+## Fixed effects SEM
+semfe <- spml(formula = frpressfh ~ gdppc+pop+fdi+intusers+crises+democ, data = cigar, listw = lwcig, model = "within",
+              effect = "individual",
+              spatial.error = "b", lag = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Остатки панельной регрессионной модели
-res1 <- ols1$residuals
-summary(res1)
-plot(coordinates(DataFrame),pch=21, bg="green", cex=10*(res1-min(res1))) 
+resid3 <- m.fe1$residuals
+summary(resid3)
+plot(coordinates(DataFrameRes2),pch=21, bg="green", cex=0.05*(resid3-min(resid3))) 
 
 # spatial autocorrelation of residuals
-moran.test(res1, listw1, zero.policy=TRUE)
+moran.test(resid3, listw1, zero.policy=TRUE)
 moran.plot(res1, listw1, zero.policy=FALSE, xlab="Residuals", ylab="Spatially lagged residuals")
 
 # choose the spatial model
 lm.morantest(ols1, listw1, zero.policy=TRUE)
 lm.LMtests(ols1, listw1, zero.policy=TRUE, test=c("LMerr", "LMlag", "RLMerr", "RLMlag")) 
-
-
-
-
-
 
 
 
