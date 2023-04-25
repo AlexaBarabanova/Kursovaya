@@ -327,9 +327,28 @@ m.fe2 <- plm(frpressrsf ~ gdppc+pop+fdi+intusers+crises+democ, data = panel, mod
 stargazer(m.fe1,m.fe2, type = "html",
           out = "pols.htm",
           title = "Results of POLS Model")
+summary(m.fe2)$r.squared
 
+# Сбалансированные выборки панельных данных ------------------------------------
+
+#countries <- weights$row.names
+#panel2 <- panel %>% filter(iso %in% countries)
+#write.csv(panel2, "panel2.csv")
+
+data2 <- read.csv("panelsplm.csv", header = TRUE, sep = ";")
+#panel2 <- pdata.frame(data2, index = c("iso", "year"), row.names = TRUE)
+
+datafh <- subset(data2, select = -c(frpressrsf))
+datafh <- datafh %>% dplyr::filter(iso != 'GMB')
+datafh <- datafh %>% dplyr::filter(iso != 'SWZ')
+datarsf <- subset(data2, select = -c(frpressfh))
+length(unique(datafh$iso))
+panelfh <- pdata.frame(datafh, index = c("iso", "year"), row.names = TRUE)
+panelrsf <- pdata.frame(datarsf, index = c("iso", "year"), row.names = TRUE)
+
+write.csv(datarsf,"check2.csv")
 # Матрица смежности ------------------------------------------------------------
-DataFrameRes2$country.id<-DataFrameRes2$ISO3
+#DataFrameRes2$country.id<-DataFrameRes2$ISO3
 #DataFrameRes2 <- as(DataFrameRes2, "Spatial")
 #View(DataFrameRes2@data)
 weightsrsf <- read.csv("weightsrsf.csv", header = TRUE, sep = ";", row.names=1)
@@ -337,72 +356,127 @@ weightrsf = weightsrsf[,colSums(weightsrsf)!=0]
 weightrsf = weightrsf[rowSums(weightrsf[])>0,]
 
 wrsf <- as.matrix(weightrsf)
-## standardization
 ## make it a listw
 lwrsf <- mat2listw(wrsf)
-#lw <- nb2listw(lw$neighbours, glist=lw$weights, zero.policy=TRUE)
-summary(lw)
 
-# Объединение пространственных и панельных данных ------------------------------
-countries <- row.names(weights)
+weightsfh <- read.csv("weightsfh.csv", header = TRUE, sep = ";", row.names=1)
+weightfh = weightsfh[,colSums(weightsfh)!=0]
+weightfh = weightfh[rowSums(weightfh[])>0,]
+wfh <- as.matrix(weightfh)
+lwfh <- mat2listw(wfh)
 
-panel2 <- panel %>% filter(iso %in% countries)
-write.csv(panel2, "panel2.csv")
+# LM тесты ---------------------------------------------------------------------
+fm1 <- frpressfh ~ gdppc+pop+fdi+intusers+crises+democ
+fm2 <- frpressrsf ~ gdppc+pop+fdi+intusers+crises+democ  
 
-data2 <- read.csv("panelsplm.csv", header = TRUE, sep = ";")
-#panel2 <- pdata.frame(data2, index = c("iso", "year"), row.names = TRUE)
+slmtest(fm1, data=datafh, listw = lwfh, test="lml", model="within", index = c("iso", "year"))
+slmtest(fm1, data=datafh, listw = lwfh, test="lme", model="within", index = c("iso", "year"))
+slmtest(fm1, data=datafh, listw = lwfh, test="rlml", model="within", index = c("iso", "year"))
+slmtest(fm1, data=datafh, listw = lwfh, test="rlme", model="within", index = c("iso", "year"))
+slmtest(fm2, data=datarsf, listw = lwrsf, test="lml", model="within", index = c("iso", "year"))
+slmtest(fm2, data=datarsf, listw = lwrsf, test="lme", model="within", index = c("iso", "year"))
+slmtest(fm2, data=datarsf, listw = lwrsf, test="rlml", model="within", index = c("iso", "year"))
+slmtest(fm2, data=datarsf, listw = lwrsf, test="rlme", model="within", index = c("iso", "year"))
 
-datafh <- subset(data2, select = -c(frpressrsf))
-datarsf <- subset(data2, select = -c(frpressfh))
-panelrsf <- pdata.frame(datarsf, index = c("iso", "year"), row.names = TRUE)
-
-length(unique(datarsf$iso))
-
-#weightsfh = weight[rownames(weight)!=c("GMB", "SWZ"),colnames(weight)!=c("GMB", "SWZ")]
-#weightsrsf = weight[rownames(weight)!=c("KWT"),colnames(weight)!=c("KWT")]
-
-lwfh <- mat2listw(weight)
-lwrsf <- mat2listw(weight)
-#DataFrameRes2 <- merge(world, panel2, by.x='ISO3',by.y='iso')
-#DataFrameRes2 <- pdata.frame(DataFrameRes2, index = c("ISO3", "year"), row.names = TRUE)
-#sf_use_s2(FALSE)
 
 ## Fixed effects SAR
-sarfe <- spml(formula = frpressrsf ~ gdppc+pop+fdi+intusers+crises+democ, data = datarsf, listw = lwrsf, model = "within",
+sarfe <- spml(formula = frpressfh ~ gdppc+pop+fdi+intusers+crises+democ, data = datafh, listw = lwfh, model = "within",
               index = c("iso", "year"),
               effect = "individual",
               spatial.error = "none", lag = TRUE)
 summary(sarfe)
+sarfe$sigma2
+AICsplm(sarfe, criterion="AIC")
+summary(sarfe)$rsqr
+
+sparse.W <- listw2dgCMatrix(lwfh)  
+time <- length(unique(datafh$year))
+s.lwcountries <- kronecker(Diagonal(time), sparse.W)  
+trMatc <- trW(s.lwcountries, type="mult")
+imp <- impacts(sarfe, tr = trMatc, R = 1000)
+summary(imp, zstats=TRUE, short=T)  
+
+  
 ## Fixed effects SEM
-semfe <- spml(formula = frpressfh ~ gdppc+pop+fdi+intusers+crises+democ, data = cigar, listw = lwcig, model = "within",
+semfe <- spml(formula = frpressrsf ~ gdppc+pop+fdi+intusers+crises+democ, data = datarsf, listw = lwrsf, model = "within",
               effect = "individual",
               spatial.error = "b", lag = FALSE)
+summary(sarfe)
+semfe$sigma2
+AICsplm(semfe, criterion="AIC")
+summary(semfe)$rsqr
+
+# Fixed effects SDM
+panelrsf$gdppc_l <- slag(panelrsf$gdppc, lwrsf)
+panelrsf$pop_l <- slag(panelrsf$pop, lwrsf)
+panelrsf$fdi_l <- slag(panelrsf$fdi, lwrsf)
+panelrsf$democ_l <- slag(panelrsf$democ, lwrsf)
+panelrsf$intusers_l <- slag(panelrsf$intusers, lwrsf)
+panelrsf$crises_l <- slag(panelrsf$crises, lwrsf)
+datarsf$gdppc_l <- panelrsf$gdppc_l
+datarsf$pop_l <- panelrsf$pop_l
+datarsf$fdi_l <- panelrsf$fdi_l
+datarsf$intusers_l <- panelrsf$intusers_l
+datarsf$crises_l <- panelrsf$crises_l
+datarsf$democ_l <- panelrsf$democ_l
+
+sdmfe <- spml(frpressrsf ~ gdppc+pop+fdi+intusers+crises+democ+gdppc_l+pop_l+fdi_l+intusers_l+crises_l+democ_l,
+              index = c("iso", "year"),
+              data = datarsf, listw = lwrsf , model="within", spatial.error = "b", lag = TRUE)
+summary(sdmfe)
+sparse.W2 <- listw2dgCMatrix(lwrsf)  
+time2 <- length(unique(datarsf$year))
+s.lwcountries2 <- kronecker(Diagonal(time2), sparse.W2)  
+trMatc2 <- trW(s.lwcountries2, type="mult")
+imp2 <- impacts(sdmfe, tr = trMatc2, R = 1000)
+summary(imp2, zstats=TRUE, short=T) 
+# Зависимая переменная - свобода прессы Freedom House --------------------------
+stargazer(m.fe1, ols1, type = "html",
+          out = "frpressfh.htm",
+          title = "Результаты регрессионного анализа для индекса свободы прессы FH")
+
+
+
+# Зависимая переменная - свобода прессы RSF ------------------------------------
+stargazer(m.fe2, sem, type = "html",
+          out = "frpressrsf.htm",
+          title = "Результаты регрессионного анализа для индекса свободы прессы RSF")
+
+
+
+AICsplm = function(object, k=2, criterion=c("AIC", "BIC")){ 
+  sp = summary(object)
+  l = sp$logLik
+  np = length(coef(sp))
+  N = nrow(sp$model)
+  if (sp$effects=="sptpfe") {
+    n = length(sp$res.eff[[1]]$res.sfe) 
+    T = length(sp$res.eff[[1]]$res.tfe) 
+    np = np+n+T
+  }
+  if (sp$effects=="spfe") {
+    n = length(sp$res.eff[[1]]$res.sfe)
+    np = np+n+1 
+  }
+  if (sp$effects=="tpfe") {
+    T = length(sp$res.eff[[1]]$res.tfe)
+    np = np+T+1
+  }
+  if (criterion=="AIC"){
+    aic = -2*l+k*np
+    names(aic) = "AIC"
+    return(aic)
+  }
+  if (criterion=="BIC"){
+    bic = -2*l+log(N)*np
+    names(bic) = "BIC"
+    return(bic)
+  } 
+}
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-## Остатки панельной регрессионной модели
-resid3 <- m.fe1$residuals
-summary(resid3)
-plot(coordinates(DataFrameRes2),pch=21, bg="green", cex=0.05*(resid3-min(resid3))) 
-
-# spatial autocorrelation of residuals
-moran.test(resid3, listw1, zero.policy=TRUE)
-moran.plot(res1, listw1, zero.policy=FALSE, xlab="Residuals", ylab="Spatially lagged residuals")
-
-# choose the spatial model
-lm.morantest(ols1, listw1, zero.policy=TRUE)
-lm.LMtests(ols1, listw1, zero.policy=TRUE, test=c("LMerr", "LMlag", "RLMerr", "RLMlag")) 
 
 
 
