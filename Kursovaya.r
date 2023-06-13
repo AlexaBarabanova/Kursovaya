@@ -258,6 +258,11 @@ moran.plot(resid2, listw2, zero.policy=FALSE, xlab="Остатки", ylab="Ос�
 lm.morantest(ols2, listw2, zero.policy=TRUE)
 lm.LMtests(ols2, listw2, zero.policy=TRUE, test=c("LMerr", "LMlag", "RLMerr", "RLMlag"))
 
+# SAR (Spatial autoregressive) model: Spatially Lagged Y: y=rho Wy+X beta+e ----------------------
+res31 <- DataFrame$frpressfh ~ DataFrame$gdppc + DataFrame$pop + DataFrame$fdi + DataFrame$intusers + DataFrame$crises + DataFrame$democ
+sar <- lagsarlm(res31, listw=listw1, data=DataFrame, Durbin=FALSE, zero.policy=TRUE)
+summary(sar)
+
 # SEM (Spatial error model):  y = X beta + u, u = lambda Wu + e --------------
 res3 <- DataFrame$frpressrsf ~ DataFrame$gdppc + DataFrame$pop + DataFrame$fdi + DataFrame$intusers + DataFrame$crises + DataFrame$democ
 
